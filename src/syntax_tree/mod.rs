@@ -1,5 +1,7 @@
 //! This module holds the syntax tree
 
+use std::fmt::Error;
+
 pub struct Tree<'a> {
     /// Holds an array of expressions
     expressions: Vec<&'a TokenExpression<'a>>,
@@ -57,11 +59,4 @@ impl<'a> TokenExpression<'a> {
             args,
         }
     }
-}
-
-/// Parse a string
-pub fn parse(contents: &str) -> Tree {
-    let mut tree = Tree::new();
-
-    tree
 }
