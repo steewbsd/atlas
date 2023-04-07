@@ -1,14 +1,16 @@
-//! This module holds the syntax tree 
+//! This module holds the syntax tree
 
 pub struct Tree<'a> {
     /// Holds an array of expressions
-    expressions: Vec<&'a TokenExpression<'a>>
+    expressions: Vec<&'a TokenExpression<'a>>,
 }
 
 impl Tree<'_> {
     /// Create a new syntax tree.
     pub fn new() -> Self {
-        Tree { expressions: Vec::new() }
+        Tree {
+            expressions: Vec::new(),
+        }
     }
 }
 
@@ -49,7 +51,11 @@ pub struct TokenExpression<'a> {
 impl<'a> TokenExpression<'a> {
     /// Create a new expression from given keyword, indentation level, and arguments.
     pub fn new(keyword: Token<'a>, level: usize, args: Vec<Token<'a>>) -> Self {
-        TokenExpression { keyword, level, args}
+        TokenExpression {
+            keyword,
+            level,
+            args,
+        }
     }
 }
 
