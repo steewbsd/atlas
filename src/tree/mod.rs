@@ -1,7 +1,5 @@
 //! This module holds the syntax tree
 
-use std::fmt::Error;
-
 pub struct Tree<'a> {
     /// Holds an array of expressions
     expressions: Vec<&'a TokenExpression<'a>>,
@@ -37,6 +35,24 @@ impl<'a> From<&str> for Token<'a> {
         match parsed {
             _ => Token::Keyword(String::from("TODO")),
         }
+    }
+}
+
+/// Special symbols for the syntax
+pub enum Symbols {
+    LPAREN,
+    RPAREN,
+}
+
+impl TryFrom<char> for Symbols {
+    type Error = &'static str;
+    fn try_from(value: char) -> Result<Self, Self::Error> {
+        match value {
+            '(' => Ok(Self::LPAREN),
+            ')' => Ok(Self::RPAREN),
+            _ => Err("Could not convert char to a known symbol"),
+        }
+        
     }
 }
 

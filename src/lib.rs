@@ -1,11 +1,11 @@
 use std::path::Path;
 
-use syntax_tree::Tree;
+use tree::{Tree, Symbols};
 
 /// This module contains the language logic. Operators, functions, et cetera.
-pub mod atlas_logic;
+pub mod logic;
 /// This module holds the syntax that composes the language, such as its parsed tree.
-pub mod syntax_tree;
+pub mod tree;
 
 pub struct Parser<'a> {
     tree: Tree<'a>,
@@ -31,8 +31,31 @@ impl Parser<'_> {
     pub fn parse(&mut self, contents: String) {
         self.contents = contents;
         let char_iterator = self.contents.chars();
+        // start simple, by finding the first TokenExpression
+        let mut unclosed_exp = false;
         for char in char_iterator.into_iter() {
-            println!("Next char: {}", char);
+            // try to get a known symbol from this char
+            if let Ok(sym) = Symbols::try_from(char) {
+                match sym {
+                    Symbols::LPAREN if unclosed_exp == false => {
+                        unclosed_exp = true;
+                    },
+                    Symbols::RPAREN if unclosed_exp == true => {
+                        unclosed_exp = false;
+                        // TEMP: check if we can get a closed sexp
+                        panic!("Unfinished, but we got a full sexp.");
+                    }
+                    Symbols::RPAREN if unclosed_exp == false => {
+                        panic!("Unexpected delimiter");
+                    }
+                    Symbols::LPAREN if unclosed_exp == true => {
+                        panic!("TODO: nested expression")
+                    }
+                    _ => (),
+                }
+            } else {
+
+            }
         }
     }
 }
