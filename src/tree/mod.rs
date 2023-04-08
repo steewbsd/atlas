@@ -1,7 +1,5 @@
 //! This module holds the syntax tree
-
-use std::collections::HashMap;
-
+#[derive(Debug)]
 pub struct Tree<'a> {
     /// Holds an array of expressions
     expressions: Vec<TokenExpression<'a>>,
@@ -14,9 +12,13 @@ impl<'a> Tree<'a> {
             expressions: Vec::new(),
         }
     }
-
-    pub fn insert_expression(&mut self, expr: TokenExpression<'a>) {
+    /// push a new expression to the tree vec
+    pub fn push(&mut self, expr: TokenExpression<'a>) {
         self.expressions.push(expr);
+    }
+    /// get expression from index
+    pub fn peek(&mut self, index: usize) -> &mut TokenExpression<'a> {
+        self.expressions.get_mut(index).unwrap()
     }
 }
 
@@ -63,12 +65,13 @@ impl TryFrom<char> for Symbols {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 /// A group of tokens and arguments.
 pub struct TokenExpression<'a> {
     // Keyword for this expression
     keyword: Option<Token<'a>>,
     // Nesting level
-    depth: usize,
+    pub depth: usize,
     // Function arguments.
     args: Vec<Token<'a>>,
     // holds the location of both of this expression's delimiters
@@ -94,9 +97,16 @@ impl<'a> TokenExpression<'a> {
     pub fn insert_opening(&mut self, index: usize) {
         self.delimiters.0 = Some(index);
     }
+    /// Get the index of this expression's opening paren
+    pub fn get_opening(&mut self) -> Option<usize> {
+        self.delimiters.0
+    }
     /// Insert the index of this expression's closing paren
     pub fn insert_closing(&mut self, index: usize) {
         self.delimiters.1 = Some(index);
     }
-
+    /// Get the index of this expression's opening paren
+    pub fn get_closing(&mut self) -> Option<usize> {
+        self.delimiters.1
+    }
 }
