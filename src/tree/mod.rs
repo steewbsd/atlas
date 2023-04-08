@@ -1,16 +1,22 @@
 //! This module holds the syntax tree
 
+use std::collections::HashMap;
+
 pub struct Tree<'a> {
     /// Holds an array of expressions
-    expressions: Vec<&'a TokenExpression<'a>>,
+    expressions: Vec<TokenExpression<'a>>,
 }
 
-impl Tree<'_> {
+impl<'a> Tree<'a> {
     /// Create a new syntax tree.
     pub fn new() -> Self {
         Tree {
             expressions: Vec::new(),
         }
+    }
+
+    pub fn insert_expression(&mut self, expr: TokenExpression<'a>) {
+        self.expressions.push(expr);
     }
 }
 
@@ -19,6 +25,7 @@ impl Tree<'_> {
 //                                                                ---------
 //                                                                Token  ⤶
 // Will have the same lifetime as the rest of the expression.
+#[derive(Debug)]
 pub enum Token<'a> {
     // Function keywords.
     Keyword(String),
@@ -52,27 +59,44 @@ impl TryFrom<char> for Symbols {
             ')' => Ok(Self::RPAREN),
             _ => Err("Could not convert char to a known symbol"),
         }
-        
     }
 }
 
+#[derive(Debug)]
 /// A group of tokens and arguments.
 pub struct TokenExpression<'a> {
     // Keyword for this expression
-    keyword: Token<'a>,
+    keyword: Option<Token<'a>>,
     // Nesting level
-    level: usize,
+    depth: usize,
     // Function arguments.
     args: Vec<Token<'a>>,
+    // holds the location of both of this expression's delimiters
+    pub delimiters: (Option<usize>, Option<usize>),
 }
 
 impl<'a> TokenExpression<'a> {
-    /// Create a new expression from given keyword, indentation level, and arguments.
-    pub fn new(keyword: Token<'a>, level: usize, args: Vec<Token<'a>>) -> Self {
+    /// Create a new expression
+    pub fn new() -> Self {
         TokenExpression {
-            keyword,
-            level,
-            args,
+            keyword: None,
+            depth: 0,
+            args: Vec::new(),
+            delimiters: (None, None),
         }
     }
+    /// Checks if the current expression has both its delimiters. Note, it does not mean it's empty,
+    /// this function only returns true if the left delimiter "(" is present, but not the closing delimiter.
+    pub fn is_unclosed(&self) -> bool {
+        self.delimiters.0 != None && self.delimiters.1 == None
+    }
+    /// Insert the index of this expression's opening paren
+    pub fn insert_opening(&mut self, index: usize) {
+        self.delimiters.0 = Some(index);
+    }
+    /// Insert the index of this expression's closing paren
+    pub fn insert_closing(&mut self, index: usize) {
+        self.delimiters.1 = Some(index);
+    }
+
 }
