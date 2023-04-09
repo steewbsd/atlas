@@ -1,7 +1,11 @@
 //! This module holds the syntax tree
+
+use std::marker::PhantomData;
+
 #[derive(Debug)]
 pub struct Tree<'a> {
     /// Holds an array of expressions
+    _marker: PhantomData<&'a ()>,
     expressions: Vec<TokenExpression<'a>>,
 }
 
@@ -9,6 +13,7 @@ impl<'a> Tree<'a> {
     /// Create a new syntax tree.
     pub fn new() -> Self {
         Tree {
+            _marker: PhantomData::default(),
             expressions: Vec::new(),
         }
     }
@@ -16,9 +21,25 @@ impl<'a> Tree<'a> {
     pub fn push(&mut self, expr: TokenExpression<'a>) {
         self.expressions.push(expr);
     }
-    /// get expression from index
-    pub fn peek(&mut self, index: usize) -> &mut TokenExpression<'a> {
+    /// get expression from index (mutable)
+    pub fn peek_mut(&mut self, index: usize) -> &mut TokenExpression<'a> {
         self.expressions.get_mut(index).unwrap()
+    }
+    /// get expression from index
+    pub fn peek(&self, index: usize) -> &TokenExpression<'a> {
+        self.expressions.get(index).unwrap()
+    }
+}
+#[derive(Debug)]
+#[allow(dead_code)]
+pub struct ExpressionLocation {
+    depth: usize,
+    index: usize,
+}
+
+impl ExpressionLocation {
+    pub fn new(depth: usize, index: usize) -> Self {
+        ExpressionLocation { depth, index }
     }
 }
 
@@ -34,9 +55,9 @@ pub enum Token<'a> {
     // A string or number literal.
     Literal(String),
     // TODO
-    Variable,
-    // Might hold a reference to another expression to eval.
-    Expression(&'a TokenExpression<'a>),
+    Variable(PhantomData<&'a ()>),
+    // Might hold a reference to another expression to eval. (depth, index)
+    Expression(ExpressionLocation),
 }
 
 impl<'a> From<&str> for Token<'a> {
@@ -69,11 +90,11 @@ impl TryFrom<char> for Symbols {
 /// A group of tokens and arguments.
 pub struct TokenExpression<'a> {
     // Keyword for this expression
-    keyword: Option<Token<'a>>,
+    pub keyword: Option<Token<'a>>,
     // Nesting level
     pub depth: usize,
     // Function arguments.
-    args: Vec<Token<'a>>,
+    pub args: Vec<Token<'a>>,
     // holds the location of both of this expression's delimiters
     pub delimiters: (Option<usize>, Option<usize>),
 }
