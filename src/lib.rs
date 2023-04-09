@@ -86,16 +86,19 @@ impl Parser {
 
     pub fn parse(&mut self, contents: String) {
         self.contents = contents.clone();
+        println!("Parsing: {}", self.contents);
         for (i, c) in self.contents.chars().into_iter().enumerate() {
             print!("{}:{} ", i, c);
         }
+        println!("");
+        println!("");
         let char_iterator = contents.chars();
         // start simple, by finding the first TokenExpression
         // add first TokenExpression
         self.tree.push(TokenExpression::new());
         self.n_expressions_in_depth.push(0);
         for (index, char) in char_iterator.into_iter().enumerate() {
-            println!("Parsing char: {} from depth: {}", char, self.current_depth);
+            // println!("Parsing char: {} from depth: {}", char, self.current_depth);
             // try to get a known symboindex l from this char
             if let Ok(sym) = Symbols::try_from(char) {
                 match sym {
@@ -156,19 +159,19 @@ impl Parser {
                         let current_expr = self.get_last_mut();
                         current_expr.insert_opening(index);
                         // HACK: workaround for mut & immutable references at the same time
+                        #[allow(unused_variables)]
                         let current_expr = ();
                         let depth = self.current_depth;
                         let current_expr = self.get_last_mut();
                         current_expr.depth = depth;
                         // END HACK
                     }
-                    _ => (),
                 }
             } else {
                 if char == ' ' {
                     continue;
                 }
-                /* let kw = self.get_last_mut().keyword;
+                let kw = &self.get_last().keyword;
                 let kw = match kw {
                     Some(Token::Keyword(current_keyword)) => {
                         let new_keyword = format!("{}{}", current_keyword, char);
@@ -176,7 +179,7 @@ impl Parser {
                     }
                     _ => Some(Token::Keyword(String::from(char))),
                 };
-                self.get_last_mut().keyword = kw; */
+                self.get_last_mut().keyword = kw;
 
                 // = Some(Token::Keyword(String::from(char)));
             }
@@ -185,6 +188,6 @@ impl Parser {
         /* if self.tree.peek(self.current_depth).is_unclosed() {
             panic!("The given expression has not been closed.");
         } */
-        println!("{:?}", self.tree);
+        println!("{:#?}", self.tree);
     }
 }
