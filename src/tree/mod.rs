@@ -1,32 +1,28 @@
 //! This module holds the syntax tree
 
-use std::marker::PhantomData;
-
 #[derive(Debug)]
-pub struct Tree<'a> {
+pub struct Tree {
     /// Holds an array of expressions
-    _marker: PhantomData<&'a ()>,
-    expressions: Vec<TokenExpression<'a>>,
+    expressions: Vec<TokenExpression>,
 }
 
-impl<'a> Tree<'a> {
+impl Tree {
     /// Create a new syntax tree.
     pub fn new() -> Self {
         Tree {
-            _marker: PhantomData::default(),
             expressions: Vec::new(),
         }
     }
     /// push a new expression to the tree vec
-    pub fn push(&mut self, expr: TokenExpression<'a>) {
+    pub fn push(&mut self, expr: TokenExpression) {
         self.expressions.push(expr);
     }
     /// get expression from index (mutable)
-    pub fn peek_mut(&mut self, index: usize) -> &mut TokenExpression<'a> {
+    pub fn peek_mut(&mut self, index: usize) -> &mut TokenExpression {
         self.expressions.get_mut(index).unwrap()
     }
     /// get expression from index
-    pub fn peek(&self, index: usize) -> &TokenExpression<'a> {
+    pub fn peek(&self, index: usize) -> &TokenExpression {
         self.expressions.get(index).unwrap()
     }
 }
@@ -49,19 +45,19 @@ impl ExpressionLocation {
 //                                                                Token  ⤶
 // Will have the same lifetime as the rest of the expression.
 #[derive(Debug)]
-pub enum Token<'a> {
+pub enum Token {
     // Function keywords.
     Keyword(String),
     // A string or number literal.
     Literal(String),
     // TODO
-    Variable(PhantomData<&'a ()>),
+    Variable,//(PhantomData<&'a ()>),
     // Might hold a reference to another expression to eval. (depth, index)
     Expression(ExpressionLocation),
 }
 
-impl<'a> From<&str> for Token<'a> {
-    fn from(parsed: &str) -> Token<'a> {
+impl<'a> From<&str> for Token {
+    fn from(parsed: &str) -> Token {
         match parsed {
             _ => Token::Keyword(String::from("TODO")),
         }
@@ -88,18 +84,18 @@ impl TryFrom<char> for Symbols {
 #[derive(Debug)]
 #[allow(dead_code)]
 /// A group of tokens and arguments.
-pub struct TokenExpression<'a> {
+pub struct TokenExpression {
     // Keyword for this expression
-    pub keyword: Option<Token<'a>>,
+    pub keyword: Option<Token>,
     // Nesting level
     pub depth: usize,
     // Function arguments.
-    pub args: Vec<Token<'a>>,
+    pub args: Vec<Token>,
     // holds the location of both of this expression's delimiters
     pub delimiters: (Option<usize>, Option<usize>),
 }
 
-impl<'a> TokenExpression<'a> {
+impl TokenExpression {
     /// Create a new expression
     pub fn new() -> Self {
         TokenExpression {

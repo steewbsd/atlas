@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, path::Path};
+use std::{path::Path};
 
 use tree::{Symbols, TokenExpression, Tree};
 
@@ -9,26 +9,24 @@ pub mod logic;
 /// This module holds the syntax that composes the language, such as its parsed tree.
 pub mod tree;
 
-pub struct Parser<'a> {
-    pub tree: Tree<'a>,
+pub struct Parser {
+    pub tree: Tree,
     pub contents: String,
     pub current_depth: usize,
     // vector with last index used in this depth
     // represents how many arguments (tokens) have been provided in each depth. As the vector
     // is ordered, to get the arguments of an specific depth, just depth_argument_len.get(depth)
     pub depth_argument_len: Vec<usize>,
-    _marker: PhantomData<&'a ()>,
     // etc.
 }
 
-impl Parser<'_> {
+impl Parser {
     pub fn new() -> Self {
         Parser {
             tree: Tree::new(),
             contents: String::new(),
             current_depth: 0,
             depth_argument_len: Vec::new(),
-            _marker: PhantomData::default(),
         }
     }
 
@@ -113,7 +111,7 @@ impl Parser<'_> {
                     .peek_mut(self.calculate_index(
                         self.current_depth,
                         0,
-//                        *self.depth_argument_len.get(self.current_depth).unwrap(),
+                        //                        *self.depth_argument_len.get(self.current_depth).unwrap(),
                     ))
                     .keyword;
                 let kw = match kw {
