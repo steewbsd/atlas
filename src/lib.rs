@@ -33,20 +33,20 @@ impl Parser {
         let depth = self.n_expressions_in_depth[self.current_depth];
         if depth == 0 {
             self.tree
-            .peek(self.calculate_index(self.n_expressions_in_depth[self.current_depth]))
+                .peek(self.calculate_index(self.n_expressions_in_depth[self.current_depth]))
         } else {
             self.tree
-            .peek(self.calculate_index(self.n_expressions_in_depth[self.current_depth] -1))
+                .peek(self.calculate_index(self.n_expressions_in_depth[self.current_depth] - 1))
         }
     }
     pub fn get_last_mut(&mut self) -> &mut TokenExpression {
         let depth = self.n_expressions_in_depth[self.current_depth];
         if depth == 0 {
             self.tree
-            .peek_mut(self.calculate_index(self.n_expressions_in_depth[self.current_depth]))
+                .peek_mut(self.calculate_index(self.n_expressions_in_depth[self.current_depth]))
         } else {
             self.tree
-            .peek_mut(self.calculate_index(self.n_expressions_in_depth[self.current_depth] -1))
+                .peek_mut(self.calculate_index(self.n_expressions_in_depth[self.current_depth] - 1))
         }
     }
     // This function calculates the access index for an element at (depth, index). This is neccessary
@@ -62,15 +62,16 @@ impl Parser {
         let mut idx_sum: usize = 0;
         for (cur_depth, lens) in self.n_expressions_in_depth.clone().into_iter().enumerate() {
             if cur_depth == self.current_depth {
-                // if we are in the desired depth, only add up to the required index.
+                // if we are in the desired depth, only add up to the required index, and stop adding
                 idx_sum += index;
+                break;
             } else {
                 // else if we are in the previous depths, we need to sum the entire length of the vector.
                 idx_sum += lens;
             }
         }
         // index starts at 0
-/*         if idx_sum > 0 {
+        /*         if idx_sum > 0 {
             idx_sum -= 1;
         } */
         idx_sum
@@ -86,7 +87,7 @@ impl Parser {
     pub fn parse(&mut self, contents: String) {
         self.contents = contents.clone();
         for (i, c) in self.contents.chars().into_iter().enumerate() {
-            print!("{}:{} ",i, c);
+            print!("{}:{} ", i, c);
         }
         let char_iterator = contents.chars();
         // start simple, by finding the first TokenExpression
@@ -99,21 +100,22 @@ impl Parser {
             if let Ok(sym) = Symbols::try_from(char) {
                 match sym {
                     // check for opening paren if we closed all previous expressions
-                    /*   Symbols::LPAREN if self.get_last().get_opening() == None => {
-                        let current_expr = self.tree.peek_mut(self.current_depth);
-                        current_expr.insert_opening(index);
-                    } */
-                    //Symbols::RPAREN if self.get_last().is_unclosed() == true => {
                     Symbols::RPAREN => {
                         let current_expr = self.get_last_mut();
                         if current_expr.is_unclosed() {
                             current_expr.insert_closing(index);
+                            if self.current_depth > 0 {
+                                // go one expression up
+                                self.current_depth -= 1;
+                            }
                         } else {
-                            // TODO: move one left
-                        }
-                        if self.current_depth > 0 {
-                            // go one expression up
-                            self.current_depth -= 1;
+                            if self.current_depth > 0 {
+                                // go one expression up
+                                self.current_depth -= 1;
+                            }
+                            let idx = self.calculate_index(0);
+                            let current_expr = self.tree.peek_mut(idx);
+                            current_expr.insert_closing(index);
                         }
                     }
                     //Symbols::LPAREN if self.get_last().is_unclosed() == true => {
@@ -128,17 +130,17 @@ impl Parser {
                         // increment this depth's index, otherwise, push a new depth to the vector
                         match self.n_expressions_in_depth.get(self.current_depth) {
                             Some(len) => {
-                                println!(
+/*                                 println!(
                                     "Inserting len: {} in depth: {}",
                                     len + 1,
                                     self.current_depth
-                                );
+                                ); */
                                 self.n_expressions_in_depth
                                     .insert(self.current_depth, len + 1);
                             }
                             None => {
                                 self.n_expressions_in_depth.push(0);
-                                println!("Inserting index: 1 in depth: {}", self.current_depth);
+                                //println!("Inserting index: 1 in depth: {}", self.current_depth);
                             }
                         }
                         self.tree
@@ -153,9 +155,12 @@ impl Parser {
                         // update the reference
                         let current_expr = self.get_last_mut();
                         current_expr.insert_opening(index);
-                        // increase the depth
-                        //current_expr.depth = self.current_depth;
-                        //panic!("TODO: nested expression")
+                        // HACK: workaround for mut & immutable references at the same time
+                        let current_expr = ();
+                        let depth = self.current_depth;
+                        let current_expr = self.get_last_mut();
+                        current_expr.depth = depth;
+                        // END HACK
                     }
                     _ => (),
                 }
