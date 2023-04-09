@@ -23,19 +23,10 @@ impl Tree {
     }
     /// get expression from index
     pub fn peek(&self, index: usize) -> &TokenExpression {
-        self.expressions.get(index).unwrap()
-    }
-}
-#[derive(Debug)]
-#[allow(dead_code)]
-pub struct ExpressionLocation {
-    depth: usize,
-    index: usize,
-}
-
-impl ExpressionLocation {
-    pub fn new(depth: usize, index: usize) -> Self {
-        ExpressionLocation { depth, index }
+        match self.expressions.get(index) {
+            Some(expression) => expression,
+            None => self.expressions.get(index - 1).unwrap(),
+        }
     }
 }
 
@@ -53,7 +44,7 @@ pub enum Token {
     // TODO
     Variable,//(PhantomData<&'a ()>),
     // Might hold a reference to another expression to eval. (depth, index)
-    Expression(ExpressionLocation),
+    Expression((usize, usize)),
 }
 
 impl<'a> From<&str> for Token {
@@ -115,7 +106,7 @@ impl TokenExpression {
         self.delimiters.0 = Some(index);
     }
     /// Get the index of this expression's opening paren
-    pub fn get_opening(&mut self) -> Option<usize> {
+    pub fn get_opening(&self) -> Option<usize> {
         self.delimiters.0
     }
     /// Insert the index of this expression's closing paren
@@ -123,7 +114,7 @@ impl TokenExpression {
         self.delimiters.1 = Some(index);
     }
     /// Get the index of this expression's opening paren
-    pub fn get_closing(&mut self) -> Option<usize> {
+    pub fn get_closing(&self) -> Option<usize> {
         self.delimiters.1
     }
 }
