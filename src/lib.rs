@@ -133,7 +133,7 @@ impl Parser {
                         // increment this depth's index, otherwise, push a new depth to the vector
                         match self.n_expressions_in_depth.get(self.current_depth) {
                             Some(len) => {
-/*                                 println!(
+                                /*                                 println!(
                                     "Inserting len: {} in depth: {}",
                                     len + 1,
                                     self.current_depth
@@ -168,6 +168,7 @@ impl Parser {
                     }
                 }
             } else {
+                // Parse words
                 if char == ' ' {
                     continue;
                 }
