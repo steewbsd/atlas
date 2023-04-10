@@ -87,11 +87,11 @@ impl Parser {
     pub fn parse(&mut self, contents: String) {
         self.contents = contents.clone();
         println!("Parsing: {}", self.contents);
-        for (i, c) in self.contents.chars().into_iter().enumerate() {
+        /* for (i, c) in self.contents.chars().into_iter().enumerate() {
             print!("{}:{} ", i, c);
         }
-        println!("");
-        println!("");
+        println!(""); */
+        println!(""); 
         let mut currently_parsing_token: String = String::new();
         let char_iterator = contents.chars();
         // start simple, by finding the first TokenExpression
@@ -108,10 +108,12 @@ impl Parser {
                         // special case where the expression ends, but we haven't stored the
                         // last parsed token yet. NOTE: we don't do this with LPAREN, cause the syntax
                         // token(expression), without a space between them, is considered incorrect.
-                        self.get_last_mut()
-                            .args
-                            .push(Token::from(currently_parsing_token.clone()));
-                        currently_parsing_token.clear();
+                        if !currently_parsing_token.is_empty() {
+                            self.get_last_mut()
+                                .args
+                                .push(Token::from(currently_parsing_token.clone()));
+                            currently_parsing_token.clear();
+                        }
                         // end token parsing
                         let current_expr = self.get_last_mut();
                         if current_expr.is_unclosed() {
@@ -191,6 +193,6 @@ impl Parser {
             }
         }
         // finished iterating, check if it's closed
-        println!("{:#?}", self.tree);
+        println!("{:?}", self.tree);
     }
 }
