@@ -142,11 +142,6 @@ impl Parser {
                         // increment this depth's index, otherwise, push a new depth to the vector
                         match self.n_expressions_in_depth.get(self.current_depth) {
                             Some(len) => {
-                                /*                                 println!(
-                                    "Inserting len: {} in depth: {}",
-                                    len + 1,
-                                    self.current_depth
-                                ); */
                                 self.n_expressions_in_depth
                                     .insert(self.current_depth, len + 1);
                             }
@@ -196,9 +191,6 @@ impl Parser {
             }
         }
         // finished iterating, check if it's closed
-        /* if self.tree.peek(self.current_depth).is_unclosed() {
-            panic!("The given expression has not been closed.");
-        } */
-        println!("{:?}", self.tree);
+        println!("{:#?}", self.tree);
     }
 }
