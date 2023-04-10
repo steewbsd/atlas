@@ -1,2 +1,4 @@
-(Hello 
-    (world))
+(defun test (arg1) 
+    (+ 1 2 arg1)
+)
+(defun another (test))
