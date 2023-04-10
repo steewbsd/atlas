@@ -105,6 +105,14 @@ impl Parser {
                 match sym {
                     // check for opening paren if we closed all previous expressions
                     Symbols::RPAREN => {
+                        // special case where the expression ends, but we haven't stored the
+                        // last parsed token yet. NOTE: we don't do this with LPAREN, cause the syntax
+                        // token(expression), without a space between them, is considered incorrect.
+                        self.get_last_mut()
+                            .args
+                            .push(Token::from(currently_parsing_token.clone()));
+                        currently_parsing_token.clear();
+                        // end token parsing
                         let current_expr = self.get_last_mut();
                         if current_expr.is_unclosed() {
                             current_expr.insert_closing(index);
@@ -172,24 +180,18 @@ impl Parser {
                 currently_parsing_token.push(char);
                 // If we reached a space, push the parsed token to the current expression
                 if char == ' ' && self.get_last().keyword.is_some() {
-                // remove the end space
-                currently_parsing_token.pop();
+                    // remove the end space
+                    currently_parsing_token.pop();
                     self.get_last_mut()
                         .args
-                        .push(Token::from(currently_parsing_token.as_str()));
+                        .push(Token::from(currently_parsing_token.clone()));
                     currently_parsing_token.clear();
-                // else, append a char to the expression, if the keyword has already been filled,
-                // and there is no space
-                } else if char == ' ' && self.get_last().keyword.is_none(){
-                    let kw = &self.get_last().keyword;
-                    let kw = match kw {
-                        Some(Token::Keyword(current_keyword)) => {
-                            let new_keyword = format!("{}{}", current_keyword, char);
-                            Some(Token::Keyword(new_keyword))
-                        }
-                        _ => Some(Token::Keyword(String::from(char))),
-                    };
-                    self.get_last_mut().keyword = kw;
+                // if we had no keyword, store it
+                } else if char == ' ' && self.get_last().keyword.is_none() {
+                    currently_parsing_token.pop();
+                    self.get_last_mut().keyword =
+                        Some(Token::from(currently_parsing_token.clone()));
+                    currently_parsing_token.clear();
                 }
             }
         }
@@ -197,6 +199,6 @@ impl Parser {
         /* if self.tree.peek(self.current_depth).is_unclosed() {
             panic!("The given expression has not been closed.");
         } */
-        println!("{:#?}", self.tree);
+        println!("{:?}", self.tree);
     }
 }

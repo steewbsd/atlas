@@ -38,7 +38,7 @@ impl Tree {
 #[derive(Debug)]
 pub enum Token {
     // Function keywords.
-    Keyword(String),
+    // Keyword(String),
     // A string literal (unquoted)
     Literal(String),
     // a number literal
@@ -50,14 +50,14 @@ pub enum Token {
 }
 /// try to find a keyword for this string else return a variable if it is unquoted
 /// , a literal if it has "" quotes or a number if it is a number.
-impl<'a> From<&str> for Token {
-    fn from(parsed: &str) -> Token {
+impl<'a> From<String> for Token {
+    fn from(parsed: String) -> Token {
         // quoted literal
         if parsed.starts_with('"') && parsed.ends_with('"') {
             // get rid of the quotes and return a string literal
             Token::Literal(parsed.replace('"', "").to_string())
         // number literal
-        } else if let Ok(digit) = usize::from_str_radix(parsed, 10) {
+        } else if let Ok(digit) = usize::from_str_radix(parsed.as_str(), 10) {
             Token::Number(digit)
         } else {
             Token::Variable(parsed.to_string())
