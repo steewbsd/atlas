@@ -39,18 +39,28 @@ impl Tree {
 pub enum Token {
     // Function keywords.
     Keyword(String),
-    // A string or number literal.
+    // A string literal (unquoted)
     Literal(String),
+    // a number literal
+    Number(usize),
     // TODO
-    Variable,//(PhantomData<&'a ()>),
+    Variable(String), //(PhantomData<&'a ()>),
     // Might hold a reference to another expression to eval. (depth, index)
     Expression((usize, usize)),
 }
-
+/// try to find a keyword for this string else return a variable if it is unquoted
+/// , a literal if it has "" quotes or a number if it is a number.
 impl<'a> From<&str> for Token {
     fn from(parsed: &str) -> Token {
-        match parsed {
-            _ => Token::Keyword(String::from("TODO")),
+        // quoted literal
+        if parsed.starts_with('"') && parsed.ends_with('"') {
+            // get rid of the quotes and return a string literal
+            Token::Literal(parsed.replace('"', "").to_string())
+        // number literal
+        } else if let Ok(digit) = usize::from_str_radix(parsed, 10) {
+            Token::Number(digit)
+        } else {
+            Token::Variable(parsed.to_string())
         }
     }
 }

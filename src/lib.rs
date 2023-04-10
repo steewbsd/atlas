@@ -92,6 +92,7 @@ impl Parser {
         }
         println!("");
         println!("");
+        let mut currently_parsing_token: String = String::new();
         let char_iterator = contents.chars();
         // start simple, by finding the first TokenExpression
         // add first TokenExpression
@@ -123,7 +124,7 @@ impl Parser {
                     }
                     //Symbols::LPAREN if self.get_last().is_unclosed() == true => {
                     Symbols::LPAREN => {
-                        if self.get_last().get_opening() == None {
+                        if self.get_last().get_opening().is_none() {
                             let current_expr = self.get_last_mut();
                             current_expr.insert_opening(index);
                             continue;
@@ -168,21 +169,28 @@ impl Parser {
                     }
                 }
             } else {
-                // Parse words
-                if char == ' ' {
-                    continue;
+                currently_parsing_token.push(char);
+                // If we reached a space, push the parsed token to the current expression
+                if char == ' ' && self.get_last().keyword.is_some() {
+                // remove the end space
+                currently_parsing_token.pop();
+                    self.get_last_mut()
+                        .args
+                        .push(Token::from(currently_parsing_token.as_str()));
+                    currently_parsing_token.clear();
+                // else, append a char to the expression, if the keyword has already been filled,
+                // and there is no space
+                } else if char == ' ' && self.get_last().keyword.is_none(){
+                    let kw = &self.get_last().keyword;
+                    let kw = match kw {
+                        Some(Token::Keyword(current_keyword)) => {
+                            let new_keyword = format!("{}{}", current_keyword, char);
+                            Some(Token::Keyword(new_keyword))
+                        }
+                        _ => Some(Token::Keyword(String::from(char))),
+                    };
+                    self.get_last_mut().keyword = kw;
                 }
-                let kw = &self.get_last().keyword;
-                let kw = match kw {
-                    Some(Token::Keyword(current_keyword)) => {
-                        let new_keyword = format!("{}{}", current_keyword, char);
-                        Some(Token::Keyword(new_keyword))
-                    }
-                    _ => Some(Token::Keyword(String::from(char))),
-                };
-                self.get_last_mut().keyword = kw;
-
-                // = Some(Token::Keyword(String::from(char)));
             }
         }
         // finished iterating, check if it's closed
