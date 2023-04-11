@@ -1,4 +1,4 @@
-use std::{path::Path, borrow::Borrow};
+use std::{borrow::Borrow, path::Path, collections::HashMap};
 
 use tree::{Symbols, TokenExpression, Tree};
 
@@ -30,12 +30,35 @@ impl Parser {
             n_expressions_in_depth: Vec::new(),
         }
     }
+    //
     pub fn reduce_all(&mut self) {
-        for exp in &mut self.tree.expressions {
+        // get the lowest depth
+        // HashMap<(depth, index), Token>
+        let mut results_map: HashMap<(usize, usize), Token> = HashMap::new();
+        // sort the expressions by depth (descending)
+        self.tree
+            .expressions
+            .sort_by(|exp1, exp2| exp1.depth.cmp(&exp2.depth).reverse());
+        // iterate the re-ordered vector of expressions, and store their result in a hash map.
+        for exp in self.tree.expressions.iter_mut() {
+            if !exp.args.is_empty() {
+                for mut arg in exp.args.iter_mut() {
+                    match arg {
+                        Token::Expression((depth, index)) => {
+                            println!("Found expression to replace with a result");
+                            if let Some(val_to_update) = results_map.get_mut(&(*depth, *index)) {
+                                arg = val_to_update;
+                            }
+                        }
+                        _ => continue,
+                    }
+                }
+            }
             println!("-------------");
             println!("Reducing: {:?}", exp);
-            exp.reduce();
-            println!("Result: {:?}", exp.reduced);
+            let result = exp.reduce();
+            println!("Result: {:?}", result);
+            results_map.insert((exp.depth, exp.index), result);
         }
     }
     // get an expression from depth and index.
@@ -109,7 +132,7 @@ impl Parser {
             print!("{}:{} ", i, c);
         }
         println!(""); */
-        println!(""); 
+        println!("");
         let mut currently_parsing_token: String = String::new();
         let char_iterator = contents.chars();
         // start simple, by finding the first TokenExpression
@@ -170,6 +193,7 @@ impl Parser {
                                 //println!("Inserting index: 1 in depth: {}", self.current_depth);
                             }
                         }
+                        let depth_index = self.n_expressions_in_depth[self.current_depth];
                         self.tree
                             .peek_mut(self.current_depth)
                             .args
@@ -182,6 +206,7 @@ impl Parser {
                         // update the reference
                         let current_expr = self.get_last_mut();
                         current_expr.insert_opening(index);
+                        current_expr.index = depth_index;
                         // HACK: workaround for mut & immutable references at the same time
                         #[allow(unused_variables)]
                         let current_expr = ();

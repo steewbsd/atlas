@@ -27,7 +27,7 @@ impl BuiltinFuncs {
                         result += n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
                     // difficult due to ownership. I'll have to rethink this.
-                    } else if let Token::Expression(_exp) = arg {
+                    } else {
                         return Err("Some expression was not correctly reduced while performing an operation,
                         or an illegal argument has been passed.");
                     }
@@ -41,7 +41,7 @@ impl BuiltinFuncs {
                         result -= n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
                     // difficult due to ownership. I'll have to rethink this.
-                    } else if let Token::Expression(_exp) = arg {
+                    } else {
                         return Err("Some expression was not correctly reduced while performing an operation,
                         or an illegal argument has been passed.");
                     }
@@ -55,7 +55,7 @@ impl BuiltinFuncs {
                         result *= n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
                     // difficult due to ownership. I'll have to rethink this.
-                    } else if let Token::Expression(_exp) = arg {
+                    } else {
                         return Err("Some expression was not correctly reduced while performing an operation,
                         or an illegal argument has been passed.");
                     }
@@ -69,7 +69,7 @@ impl BuiltinFuncs {
                         result /= n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
                     // difficult due to ownership. I'll have to rethink this.
-                    } else if let Token::Expression(_exp) = arg {
+                    } else {
                         return Err("Some expression was not correctly reduced while performing an operation,
                         or an illegal argument has been passed.");
                     }

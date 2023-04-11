@@ -99,7 +99,7 @@ pub struct TokenExpression {
     pub args: Vec<Token>,
     // holds the location of both of this expression's delimiters
     pub delimiters: (Option<usize>, Option<usize>),
-    pub reduced: Option<Token>,
+    pub index: usize,
 }
 
 impl TokenExpression {
@@ -110,14 +110,14 @@ impl TokenExpression {
             depth: 0,
             args: Vec::new(),
             delimiters: (None, None),
-            reduced: None,
+            index: 0,
         }
     }
     /// Reduce this expression to a Token result
-    pub fn reduce(&mut self) {
+    pub fn reduce(&mut self) -> Token {
         let result = BuiltinFuncs::exec(self.borrow());
         match result {
-            Ok(result) => self.reduced = Some(result),
+            Ok(result) => result,
             Err(err) => {
                 // TEMP: don't panic
                 panic!("Reducing failed with error: {}", err)

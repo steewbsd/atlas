@@ -4,7 +4,7 @@ use atlas::Parser;
 
 fn main() {
     let mut parser = Parser::new();
-    parser.parse(String::from(r#"(+ 2 1 - 3 7)"#));
+    parser.parse(String::from(r#"(+ 1 1 (- 2 1)"#));
     parser.reduce_all();
     //let path = Path::new("/home/steew/Projects/local/atlas/src/bin/tests/test.atl");
     //parser.read_file(path);
