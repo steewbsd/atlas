@@ -10,17 +10,18 @@ pub mod logic;
 pub mod tree;
 
 pub struct Parser {
-    pub tree: Tree,
-    pub contents: String,
-    pub current_depth: usize,
+    tree: Tree,
+    contents: String,
+    current_depth: usize,
     // vector with last index used in this depth
     // represents how many arguments (tokens) have been provided in each depth. As the vector
     // is ordered, to get the arguments of an specific depth, just depth_argument_len.get(depth)
-    pub n_expressions_in_depth: Vec<usize>,
+    n_expressions_in_depth: Vec<usize>,
     // etc.
 }
 
 impl Parser {
+    // create a new parser instance
     pub fn new() -> Self {
         Parser {
             tree: Tree::new(),
@@ -29,7 +30,7 @@ impl Parser {
             n_expressions_in_depth: Vec::new(),
         }
     }
-    pub fn get_last(&self) -> &TokenExpression {
+    fn get_last(&self) -> &TokenExpression {
         let depth = self.n_expressions_in_depth[self.current_depth];
         if depth == 0 {
             self.tree
@@ -39,7 +40,7 @@ impl Parser {
                 .peek(self.calculate_index(self.n_expressions_in_depth[self.current_depth] - 1))
         }
     }
-    pub fn get_last_mut(&mut self) -> &mut TokenExpression {
+    fn get_last_mut(&mut self) -> &mut TokenExpression {
         let depth = self.n_expressions_in_depth[self.current_depth];
         if depth == 0 {
             self.tree
@@ -58,7 +59,7 @@ impl Parser {
     // in n_expressions_in_depth as a vector. Each index corresponds to a depth and the value corresponds to the amount
     // of TokenExpressions that are in that depth. So, to get Depth1Idx0 we should access (Depth0args + Depth1Idx) - 1 =
     // (2 + 1) - 1 = 2, the third element in the self.tree.expressions vector.
-    pub fn calculate_index(&self, index: usize) -> usize {
+    fn calculate_index(&self, index: usize) -> usize {
         let mut idx_sum: usize = 0;
         for (cur_depth, lens) in self.n_expressions_in_depth.clone().into_iter().enumerate() {
             if cur_depth == self.current_depth {
