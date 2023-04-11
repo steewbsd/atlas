@@ -1,9 +1,13 @@
 //! This module holds the syntax tree
 
+use std::borrow::Borrow;
+
+use crate::logic::BuiltinFuncs;
+
 #[derive(Debug)]
 pub struct Tree {
     /// Holds an array of expressions
-    expressions: Vec<TokenExpression>,
+    pub(crate) expressions: Vec<TokenExpression>,
 }
 
 impl Tree {
@@ -42,11 +46,12 @@ pub enum Token {
     // A string literal (unquoted)
     Literal(String),
     // a number literal
-    Number(usize),
+    Number(f64),
     // TODO
     Variable(String), //(PhantomData<&'a ()>),
     // Might hold a reference to another expression to eval. (depth, index)
     Expression((usize, usize)),
+    Result,
 }
 /// try to find a keyword for this string else return a variable if it is unquoted
 /// , a literal if it has "" quotes or a number if it is a number.
@@ -56,8 +61,8 @@ impl<'a> From<String> for Token {
         if parsed.starts_with('"') && parsed.ends_with('"') {
             // get rid of the quotes and return a string literal
             Token::Literal(parsed.replace('"', "").to_string())
-        // number literal
-        } else if let Ok(digit) = usize::from_str_radix(parsed.as_str(), 10) {
+        // number literal as f64 representation
+        } else if let Ok(digit) = parsed.parse() {
             Token::Number(digit)
         } else {
             Token::Variable(parsed.to_string())
@@ -94,6 +99,7 @@ pub struct TokenExpression {
     pub args: Vec<Token>,
     // holds the location of both of this expression's delimiters
     pub delimiters: (Option<usize>, Option<usize>),
+    pub reduced: Option<Token>,
 }
 
 impl TokenExpression {
@@ -104,6 +110,18 @@ impl TokenExpression {
             depth: 0,
             args: Vec::new(),
             delimiters: (None, None),
+            reduced: None,
+        }
+    }
+    /// Reduce this expression to a Token result
+    pub fn reduce(&mut self) {
+        let result = BuiltinFuncs::exec(self.borrow());
+        match result {
+            Ok(result) => self.reduced = Some(result),
+            Err(err) => {
+                // TEMP: don't panic
+                panic!("Reducing failed with error: {}", err)
+            }
         }
     }
     /// Checks if the current expression has both its delimiters. Note, it does not mean it's empty,

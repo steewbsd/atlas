@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, borrow::Borrow};
 
 use tree::{Symbols, TokenExpression, Tree};
 
@@ -30,6 +30,23 @@ impl Parser {
             n_expressions_in_depth: Vec::new(),
         }
     }
+    pub fn reduce_all(&mut self) {
+        for exp in &mut self.tree.expressions {
+            println!("-------------");
+            println!("Reducing: {:?}", exp);
+            exp.reduce();
+            println!("Result: {:?}", exp.reduced);
+        }
+    }
+    // get an expression from depth and index.
+    pub fn get_from_depth_and_idx(&mut self, depth: usize, idx: usize) -> &TokenExpression {
+        let old_depth = self.current_depth;
+        self.current_depth = depth;
+        let te = &self.tree.expressions[self.calculate_index(idx)];
+        self.current_depth = old_depth;
+        te
+    }
+
     fn get_last(&self) -> &TokenExpression {
         let depth = self.n_expressions_in_depth[self.current_depth];
         if depth == 0 {
@@ -194,6 +211,6 @@ impl Parser {
             }
         }
         // finished iterating, check if it's closed
-        println!("{:?}", self.tree);
+        //println!("{:?}", self.tree);
     }
 }
