@@ -35,8 +35,14 @@ impl BuiltinFuncs {
                 Ok(Token::Number(result))
             }
             Ok(BuiltinFuncs::Substract) => {
-                let mut result: f64 = 0.0;
-                for arg in &exp.args {
+                // use first argument as the initial value
+                let mut arg_iter = exp.args.iter();
+                let mut result: f64 = match exp.args[0] {
+                    Token::Number(num) => num,
+                    _ => 0.0,
+                };
+                arg_iter.next();
+                for arg in arg_iter {
                     if let Token::Number(n) = arg {
                         result -= n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
@@ -61,10 +67,16 @@ impl BuiltinFuncs {
                     }
                 }
                 Ok(Token::Number(result))
-            },
+            }
             Ok(BuiltinFuncs::Divide) => {
-                let mut result: f64 = 1.0;
-                for arg in &exp.args {
+                // use first argument as the initial value
+                let mut arg_iter = exp.args.iter();
+                let mut result: f64 = match exp.args[0] {
+                    Token::Number(num) => num,
+                    _ => 1.0,
+                };
+                arg_iter.next();
+                for arg in arg_iter {
                     if let Token::Number(n) = arg {
                         result /= n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly

@@ -1,4 +1,4 @@
-use std::{path::Path, collections::HashMap};
+use std::{collections::HashMap, path::Path};
 
 use tree::{Symbols, TokenExpression, Tree};
 
@@ -39,14 +39,15 @@ impl Parser {
         self.tree
             .expressions
             .sort_by(|exp1, exp2| exp1.depth.cmp(&exp2.depth).reverse());
+        // println!("{:?}", self.tree);
         // iterate the re-ordered vector of expressions, and store their result in a hash map.
         for exp in self.tree.expressions.iter_mut() {
             if !exp.args.is_empty() {
                 for arg in exp.args.iter_mut() {
                     match arg {
                         Token::Expression((depth, index)) => {
-                            //println!("Found expression to replace with a result, finding: {},{}", *depth, *index);
-                            if let Some(val_to_update) = results_map.get_mut(&(*depth + 1, *index)) {
+                            if let Some(val_to_update) = results_map.get_mut(&(*depth + 1, *index))
+                            {
                                 // print!("Replaced {:?}", arg);
                                 let _ = std::mem::replace(arg, val_to_update.clone());
                                 // println!(" with {:?}", arg);
@@ -56,8 +57,8 @@ impl Parser {
                     }
                 }
             }
-            //println!("-------------");
-            //println!("Reducing: {:?}", exp);
+            // println!("-------------");
+            // println!("Reducing: {:?}", exp);
             let result = exp.reduce();
             println!("Result: {:?}", result);
             results_map.insert((exp.depth, exp.index), result);
@@ -224,15 +225,19 @@ impl Parser {
                 if char == ' ' && self.get_last().keyword.is_some() {
                     // remove the end space
                     currently_parsing_token.pop();
-                    self.get_last_mut()
-                        .args
-                        .push(Token::from(currently_parsing_token.clone()));
+                    if !currently_parsing_token.is_empty() {
+                        self.get_last_mut()
+                            .args
+                            .push(Token::from(currently_parsing_token.clone()));
+                    }
                     currently_parsing_token.clear();
                 // if we had no keyword, store it
                 } else if char == ' ' && self.get_last().keyword.is_none() {
-                    currently_parsing_token.pop();
-                    self.get_last_mut().keyword =
-                        Some(Token::from(currently_parsing_token.clone()));
+                    if !currently_parsing_token.is_empty() {
+                        currently_parsing_token.pop();
+                        self.get_last_mut().keyword =
+                            Some(Token::from(currently_parsing_token.clone()));
+                    }
                     currently_parsing_token.clear();
                 }
             }
