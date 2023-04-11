@@ -55,7 +55,7 @@ pub enum Token {
 }
 /// try to find a keyword for this string else return a variable if it is unquoted
 /// , a literal if it has "" quotes or a number if it is a number.
-impl<'a> From<String> for Token {
+impl From<String> for Token {
     fn from(parsed: String) -> Token {
         // quoted literal
         if parsed.starts_with('"') && parsed.ends_with('"') {
@@ -127,7 +127,7 @@ impl TokenExpression {
     /// Checks if the current expression has both its delimiters. Note, it does not mean it's empty,
     /// this function only returns true if the left delimiter "(" is present, but not the closing delimiter.
     pub fn is_unclosed(&self) -> bool {
-        self.delimiters.0 != None && self.delimiters.1 == None
+        self.delimiters.0.is_some() && self.delimiters.1.is_none()
     }
     /// Insert the index of this expression's opening paren
     pub fn insert_opening(&mut self, index: usize) {

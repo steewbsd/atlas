@@ -27,13 +27,54 @@ impl BuiltinFuncs {
                         result += n;
                     // TODO: we should get the expression result, but currently it's becoming increasingly
                     // difficult due to ownership. I'll have to rethink this.
-                    } else if let Token::Expression(exp) = arg {
-                        
+                    } else if let Token::Expression(_exp) = arg {
                         return Err("Some expression was not correctly reduced while performing an operation,
                         or an illegal argument has been passed.");
                     }
                 }
-                return Ok(Token::Number(result));
+                Ok(Token::Number(result))
+            }
+            Ok(BuiltinFuncs::Substract) => {
+                let mut result: f64 = 0.0;
+                for arg in &exp.args {
+                    if let Token::Number(n) = arg {
+                        result -= n;
+                    // TODO: we should get the expression result, but currently it's becoming increasingly
+                    // difficult due to ownership. I'll have to rethink this.
+                    } else if let Token::Expression(_exp) = arg {
+                        return Err("Some expression was not correctly reduced while performing an operation,
+                        or an illegal argument has been passed.");
+                    }
+                }
+                Ok(Token::Number(result))
+            }
+            Ok(BuiltinFuncs::Multiply) => {
+                let mut result: f64 = 1.0;
+                for arg in &exp.args {
+                    if let Token::Number(n) = arg {
+                        result *= n;
+                    // TODO: we should get the expression result, but currently it's becoming increasingly
+                    // difficult due to ownership. I'll have to rethink this.
+                    } else if let Token::Expression(_exp) = arg {
+                        return Err("Some expression was not correctly reduced while performing an operation,
+                        or an illegal argument has been passed.");
+                    }
+                }
+                Ok(Token::Number(result))
+            },
+            Ok(BuiltinFuncs::Divide) => {
+                let mut result: f64 = 1.0;
+                for arg in &exp.args {
+                    if let Token::Number(n) = arg {
+                        result /= n;
+                    // TODO: we should get the expression result, but currently it's becoming increasingly
+                    // difficult due to ownership. I'll have to rethink this.
+                    } else if let Token::Expression(_exp) = arg {
+                        return Err("Some expression was not correctly reduced while performing an operation,
+                        or an illegal argument has been passed.");
+                    }
+                }
+                Ok(Token::Number(result))
             }
             _ => Err("Unknown builtin function"),
         }
