@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, path::Path, collections::HashMap};
+use std::{path::Path, collections::HashMap};
 
 use tree::{Symbols, TokenExpression, Tree};
 
@@ -42,20 +42,22 @@ impl Parser {
         // iterate the re-ordered vector of expressions, and store their result in a hash map.
         for exp in self.tree.expressions.iter_mut() {
             if !exp.args.is_empty() {
-                for mut arg in exp.args.iter_mut() {
+                for arg in exp.args.iter_mut() {
                     match arg {
                         Token::Expression((depth, index)) => {
-                            println!("Found expression to replace with a result");
-                            if let Some(val_to_update) = results_map.get_mut(&(*depth, *index)) {
-                                arg = val_to_update;
+                            //println!("Found expression to replace with a result, finding: {},{}", *depth, *index);
+                            if let Some(val_to_update) = results_map.get_mut(&(*depth + 1, *index)) {
+                                // print!("Replaced {:?}", arg);
+                                let _ = std::mem::replace(arg, val_to_update.clone());
+                                // println!(" with {:?}", arg);
                             }
                         }
                         _ => continue,
                     }
                 }
             }
-            println!("-------------");
-            println!("Reducing: {:?}", exp);
+            //println!("-------------");
+            //println!("Reducing: {:?}", exp);
             let result = exp.reduce();
             println!("Result: {:?}", result);
             results_map.insert((exp.depth, exp.index), result);

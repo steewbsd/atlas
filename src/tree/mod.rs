@@ -40,6 +40,7 @@ impl Tree {
 //                                                                Token  ⤶
 // Will have the same lifetime as the rest of the expression.
 #[derive(Debug)]
+#[derive(Clone)]
 pub enum Token {
     // Function keywords.
     // Keyword(String),
