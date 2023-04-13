@@ -38,7 +38,7 @@ impl Parser {
         // sort the expressions by depth (descending)
         self.tree
             .expressions
-            .sort_by(|exp1, exp2| exp1.depth.cmp(&exp2.depth).reverse());
+            .sort_unstable_by(|exp1, exp2| exp1.depth.cmp(&exp2.depth).reverse());
         // println!("{:?}", self.tree);
         // iterate the re-ordered vector of expressions, and store their result in a hash map.
         for exp in self.tree.expressions.iter_mut() {
